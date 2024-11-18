@@ -1,17 +1,26 @@
+import java.util.Arrays;
+import java.util.Objects;
+
 public class Tuple {
-    private String key;
-    private Message value;
+    private byte[] tag;
+    private byte[] data;
 
-    public Tuple(String key, Message value) {
-        this.key = key;
-        this.value = value;
+    public Tuple(byte[] data, byte[] tag) {
+        this.tag = tag;
+        this.data = data;
     }
 
-    public String getKey() {
-        return key;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tuple tuple = (Tuple) o;
+        return tag == tuple.tag && data == tuple.data;
     }
 
-    public Message getValue() {
-        return value;
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(tag), Arrays.hashCode(data));
     }
+
 }
