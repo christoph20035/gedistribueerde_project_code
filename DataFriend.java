@@ -1,4 +1,6 @@
 import javax.crypto.SecretKey;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DataFriend{
     SecretKey symmetricKey_write;
@@ -10,6 +12,7 @@ public class DataFriend{
     byte[] iv_write;
     byte[] iv_read;
     String name;
+    List<String> messageHys = new ArrayList<>();
 
     public DataFriend(int idx_read, int idx_write, byte[] tag_read, byte[] tag_write, String name, SecretKey symmetricKey_read, SecretKey symmetricKey_write, byte[] iv_read, byte[] iv_write){
         this.idx_read = idx_read;
@@ -23,4 +26,10 @@ public class DataFriend{
         this.iv_write = iv_write;
     }
 
+    public void addMessage(String message) {
+        messageHys.add(message);
+    }
+    public List<String> getMessageHys() {
+        return messageHys;
+    }
 }

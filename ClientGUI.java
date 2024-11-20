@@ -84,7 +84,13 @@ public class ClientGUI extends JFrame {
         // Add logic to refresh the user interface (e.g., reload the friend list, clear message history)
         if (selectedFriend == null) return;
         String text = client.receiveMessage(selectedFriend);
-        messageHistory.append(selectedFriend.name+": "+text+"\n");
+        while(!text.equals("")) {
+            String receivedMessage = selectedFriend.name+": "+text+"\n";
+            messageHistory.append(receivedMessage);
+            selectedFriend.addMessage(receivedMessage);
+
+            text = client.receiveMessage(selectedFriend);
+        }
     }
 
     private void selectFriend(String friendName) {
@@ -103,21 +109,33 @@ public class ClientGUI extends JFrame {
         if (selectedFriend == null) return;
 
         messageHistory.setText(""); // Clear previous messages
-        /*for (String message : selectedFriend.getMessages()) {
-            messageHistory.append(message + "\n");
-        }*/
+        for (String message : selectedFriend.getMessageHys()) {
+            messageHistory.append(message);
+        }
     }
 
     private void sendMessage() throws IOException {
         if (selectedFriend == null || messageInput.getText().isEmpty()) return;
 
+        String text = client.receiveMessage(selectedFriend);
+        while(!text.equals("")){
+            String receivedMessage = selectedFriend.name+": "+text+"\n";
+            messageHistory.append(receivedMessage);
+            selectedFriend.addMessage(receivedMessage);
+
+            text = client.receiveMessage(selectedFriend);
+        }
+
         String message = messageInput.getText();
         /* // Add to sent messages
         selectedFriend.receiveMessage("Hello"); // Simulate received response*/
         client.sendMessage(message, selectedFriend);
-        messageHistory.append("ik: "+message + "\n");
+        String sendMessage = "ik: "+message + "\n";
+        messageHistory.append(sendMessage);
 
         messageInput.setText("");
+
+        selectedFriend.addMessage(sendMessage);
     }
 
 }
