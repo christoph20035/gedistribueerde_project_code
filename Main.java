@@ -78,8 +78,13 @@ public class Main {
         byte[] tag_2 = new byte[TAG_BITS];
         secureRandom.nextBytes(tag_2);
 
-        DataFriend df_1 = new DataFriend(index_1, index_2, tag_1, tag_2, clientBob.getName(), key_1, key_2);
-        DataFriend df_2 = new DataFriend(index_2, index_1, tag_2, tag_1, clientAlice.getName(), key_2, key_1);
+        byte[] iv_1 = new byte[16];
+        secureRandom.nextBytes(iv_1);
+        byte[] iv_2 = new byte[16];
+        secureRandom.nextBytes(iv_2);
+
+        DataFriend df_1 = new DataFriend(index_1, index_2, tag_1, tag_2, clientBob.getName(), key_1, key_2, iv_1, iv_2);
+        DataFriend df_2 = new DataFriend(index_2, index_1, tag_2, tag_1, clientAlice.getName(), key_2, key_1, iv_2, iv_1);
 
         clientAlice.addFriend(df_1);
         clientBob.addFriend(df_2);

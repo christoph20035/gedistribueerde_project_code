@@ -83,7 +83,8 @@ public class ClientGUI extends JFrame {
     private void refreshUI() throws RemoteException {
         // Add logic to refresh the user interface (e.g., reload the friend list, clear message history)
         if (selectedFriend == null) return;
-        client.receiveMessage(selectedFriend);
+        String text = client.receiveMessage(selectedFriend);
+        messageHistory.append(selectedFriend.name+": "+text+"\n");
     }
 
     private void selectFriend(String friendName) {
@@ -114,10 +115,9 @@ public class ClientGUI extends JFrame {
         /* // Add to sent messages
         selectedFriend.receiveMessage("Hello"); // Simulate received response*/
         client.sendMessage(message, selectedFriend);
-        messageHistory.append(message + "\n");
+        messageHistory.append("ik: "+message + "\n");
 
         messageInput.setText("");
-        updateMessageHistory();
     }
 
 }

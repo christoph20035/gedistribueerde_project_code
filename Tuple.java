@@ -23,4 +23,11 @@ public class Tuple {
         return Objects.hash(Arrays.hashCode(tag), Arrays.hashCode(data));
     }
 
+    public byte[] getTag(){
+        return tag;
+    }
+    public byte[] getData(){
+        return data;
+    }
+
 }

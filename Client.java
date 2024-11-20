@@ -9,6 +9,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -62,10 +63,13 @@ public class Client {
         outputStream.write(new_tag);
         byte[] data = outputStream.toByteArray();
 
-        byte[] iv = new byte[16];
-        byte[] encryptedTextAES = AES_encrypt(data, symmetric_key_write, iv);
+        byte[] encryptedTextAES = AES_encrypt(data, symmetric_key_write, selectedFriend.iv_write);
 
-        bulletinBoard.add(index_write, encryptedTextAES, digest.digest(tag_write));
+        byte[] hashed_tag = digest.digest(tag_write);
+
+        System.out.println(new_index);
+
+        bulletinBoard.add(index_write, encryptedTextAES, hashed_tag);
 
         selectedFriend.idx_write = new_index;
         selectedFriend.tag_write = new_tag;
@@ -89,10 +93,43 @@ public class Client {
         }
     }
 
-    public void receiveMessage(DataFriend friend) throws RemoteException {
+    public String receiveMessage(DataFriend friend) throws RemoteException {
         int index = friend.idx_read;
         byte[] tag = friend.tag_read;
-        bulletinBoard.get(index, tag);
+        byte[] data =  bulletinBoard.get(index, tag);
+        if(data == null) {
+            System.out.println("[WARNING] geen data received!");
+            return "";
+        }
+
+        byte[] decryptedDataAES = AES_decrypt(data, friend.symmetricKey_read, friend.iv_read);
+        if(decryptedDataAES == null) {
+            System.out.println("[WARNING] Kon data niet deëncrypteren");
+            return "";
+        }
+
+        //the last
+        byte[] new_tag = Arrays.copyOfRange(decryptedDataAES, decryptedDataAES.length - BULLETIN_BOARD_SIZE, decryptedDataAES.length);
+        byte[] new_indexB = Arrays.copyOfRange(decryptedDataAES, decryptedDataAES.length - BULLETIN_BOARD_SIZE-4, decryptedDataAES.length- BULLETIN_BOARD_SIZE);
+        byte[] message = Arrays.copyOfRange(decryptedDataAES, 0, decryptedDataAES.length - BULLETIN_BOARD_SIZE-4);
+        int new_index = ByteBuffer.wrap(new_indexB).getInt();
+        friend.idx_read = new_index;
+        friend.tag_read = new_tag;
+
+        return new String(message);
+    }
+
+    public static byte[] AES_decrypt(byte[] encryptedText, SecretKey skey, byte[] iv) {
+        try {
+            IvParameterSpec ivSpec = new IvParameterSpec(iv);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, skey, ivSpec);
+
+            return cipher.doFinal(encryptedText);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }
