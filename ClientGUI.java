@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.security.NoSuchAlgorithmException;
 
 public class ClientGUI extends JFrame {
     private Client client;
@@ -31,7 +32,7 @@ public class ClientGUI extends JFrame {
         refreshButton.addActionListener(e -> {
             try {
                 refreshUI();
-            } catch (RemoteException ex) {
+            } catch (RemoteException | NoSuchAlgorithmException ex) {
                 throw new RuntimeException(ex);
             }
         }); // Define the refresh action
@@ -67,7 +68,7 @@ public class ClientGUI extends JFrame {
         sendButton.addActionListener(e -> {
             try {
                 sendMessage();
-            } catch (IOException ex) {
+            } catch (IOException | NoSuchAlgorithmException ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -80,7 +81,7 @@ public class ClientGUI extends JFrame {
     }
 
     // Define the refreshUI method to handle the refresh action
-    private void refreshUI() throws RemoteException {
+    private void refreshUI() throws RemoteException, NoSuchAlgorithmException {
         // Add logic to refresh the user interface (e.g., reload the friend list, clear message history)
         if (selectedFriend == null) return;
         String text = client.receiveMessage(selectedFriend);
@@ -114,7 +115,7 @@ public class ClientGUI extends JFrame {
         }
     }
 
-    private void sendMessage() throws IOException {
+    private void sendMessage() throws IOException, NoSuchAlgorithmException {
         if (selectedFriend == null || messageInput.getText().isEmpty()) return;
 
         String text = client.receiveMessage(selectedFriend);

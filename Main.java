@@ -12,8 +12,9 @@ public class Main {
     // l -> tag moet groter zijn dan 2^l
     public static final int SECURITY_PARAMETER = 20;
     public static final int BULLETIN_BOARD_SIZE = 256;
+    public static final int NUMPARTITIONS = 4;
 
-    // De tag kan een waarde aannemen tussen de 2^l en 2^(2*l)
+    // De tag kan een waarde aannemen tussen de 0 en 2^(2*l)
     public static final int TAG_BITS = SECURITY_PARAMETER*2;
 
     public static KeyGenerator keyGenAES;
@@ -28,19 +29,20 @@ public class Main {
 
         Registry registry = LocateRegistry.createRegistry(PORT_NUMBER);
         // Create an instance of your server implementation
-        BulletinBoardImpl.setBulletinBoardSize(BULLETIN_BOARD_SIZE);
-        BulletinBoardImpl server = new BulletinBoardImpl(BULLETIN_BOARD_SIZE);
+
+        PartitionManager manager = new PartitionManagerImpl();
+        manager.startServers(NUMPARTITIONS, BULLETIN_BOARD_SIZE, PORT_NUMBER);
 
         // Bind the server to a specific name
-        registry.rebind(SERVER_NAME, server);
+        registry.rebind(SERVER_NAME, manager);
 
         // -------------- ADD SERVER TO CLIENT --------------
         keyGenAES = KeyGenerator.getInstance("AES");
         keyGenAES.init(256);// 256-bit sleutel
 
-        Client client_christoph = new Client("Christoph", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE);
-        Client client_gust = new Client("Gust", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE);
-        Client client_an = new Client("An", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE);
+        Client client_christoph = new Client("Christoph", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE*NUMPARTITIONS);
+        Client client_gust = new Client("Gust", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE*NUMPARTITIONS);
+        Client client_an = new Client("An", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE*NUMPARTITIONS);
 
         makeFriends(client_christoph, client_gust);
         makeFriends(client_an, client_gust);
@@ -83,8 +85,14 @@ public class Main {
         byte[] iv_2 = new byte[16];
         secureRandom.nextBytes(iv_2);
 
-        DataFriend df_1 = new DataFriend(index_1, index_2, tag_1, tag_2, clientBob.getName(), key_1, key_2, iv_1, iv_2);
-        DataFriend df_2 = new DataFriend(index_2, index_1, tag_2, tag_1, clientAlice.getName(), key_2, key_1, iv_2, iv_1);
+        // Voor de KDF
+        byte[] salt1 = new byte[32];
+        secureRandom.nextBytes(salt1);
+        byte[] salt2 = new byte[32];
+        secureRandom.nextBytes(salt2);
+
+        DataFriend df_1 = new DataFriend(index_1, index_2, tag_1, tag_2, clientBob.getName(), key_1, key_2, iv_1, iv_2, salt1, salt2);
+        DataFriend df_2 = new DataFriend(index_2, index_1, tag_2, tag_1, clientAlice.getName(), key_2, key_1, iv_2, iv_1, salt2, salt1);
 
         clientAlice.addFriend(df_1);
         clientBob.addFriend(df_2);

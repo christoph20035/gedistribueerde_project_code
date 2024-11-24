@@ -1,5 +1,6 @@
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,7 +17,7 @@ import java.util.List;
 public class Client {
     private List<DataFriend> friends = new ArrayList<> ();
     private String name;
-    private BulletinBoard bulletinBoard;
+    private PartitionManager bulletinBoard;
     private SecureRandom secureRandom = new SecureRandom();
     private int BULLETIN_BOARD_SIZE;
 
@@ -25,7 +26,7 @@ public class Client {
     public Client(String name, String SERVER_NAME, int PORT_NUMBER, int BULLETIN_BOARD_SIZE) throws RemoteException, NotBoundException, NoSuchAlgorithmException {
         this.name = name;
         Registry myRegistry = LocateRegistry.getRegistry("localhost", PORT_NUMBER);
-        bulletinBoard = (BulletinBoard) myRegistry.lookup(SERVER_NAME);
+        bulletinBoard = (PartitionManager) myRegistry.lookup(SERVER_NAME);
         if(bulletinBoard == null) {
             System.out.println("BulletinBoard not found");
         }
@@ -46,7 +47,7 @@ public class Client {
         friends.add(df2);
     }
 
-    public void sendMessage(String message, DataFriend selectedFriend) throws IOException {
+    public void sendMessage(String message, DataFriend selectedFriend) throws IOException, NoSuchAlgorithmException {
         int index_write = selectedFriend.idx_write;
         byte[] tag_write = selectedFriend.tag_write;
         SecretKey symmetric_key_write = selectedFriend.symmetricKey_write;
@@ -74,9 +75,18 @@ public class Client {
         selectedFriend.idx_write = new_index;
         selectedFriend.tag_write = new_tag;
 
+        selectedFriend.symmetricKey_write = KDF(symmetric_key_write, selectedFriend.salt_write);
+    }
 
-        System.out.println("[WARNING]: toevoegen dat de symmetrische key veranderd na dat een bericht wordt gestuurd");
-        //selectedFriend.symmetricKey_write = KDF(symmetric_key_write);
+    public SecretKey KDF(SecretKey symmetric_key, byte[] salt) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] keyBytes = symmetric_key.getEncoded();
+        digest.update(keyBytes);
+        digest.update(salt);
+
+        byte[] derivedKeyBytes = digest.digest();
+
+        return new SecretKeySpec(derivedKeyBytes, 0, 16, symmetric_key.getAlgorithm());
     }
 
     public static byte[] AES_encrypt(byte[] data, SecretKey sKey, byte[] iv) {
@@ -93,7 +103,7 @@ public class Client {
         }
     }
 
-    public String receiveMessage(DataFriend friend) throws RemoteException {
+    public String receiveMessage(DataFriend friend) throws RemoteException, NoSuchAlgorithmException {
         int index = friend.idx_read;
         byte[] tag = friend.tag_read;
         byte[] data =  bulletinBoard.get(index, tag);
@@ -115,6 +125,8 @@ public class Client {
         int new_index = ByteBuffer.wrap(new_indexB).getInt();
         friend.idx_read = new_index;
         friend.tag_read = new_tag;
+
+        friend.symmetricKey_read = KDF(friend.symmetricKey_read, friend.salt_read);
 
         return new String(message);
     }

@@ -7,16 +7,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BulletinBoardImpl extends UnicastRemoteObject implements BulletinBoard {
-    private static int BULLETIN_BOARD_SIZE = -1;
-    private static Set<Tuple>[] B;
+    private int BULLETIN_BOARD_SIZE = -1;
+    private Set<Tuple>[] B;
 
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
 
-    protected BulletinBoardImpl(int BULLETIN_BOARD_SIZE) throws RemoteException, NoSuchAlgorithmException {
+    protected BulletinBoardImpl() throws RemoteException, NoSuchAlgorithmException {
         super();
     }
-    public static void setBulletinBoardSize(int size) {
+
+    @Override
+    public void setBulletinBoardSize(int size) {
         BULLETIN_BOARD_SIZE = size;
         B = new Set[BULLETIN_BOARD_SIZE];
         for (int i = 0; i < B.length; i++) {
