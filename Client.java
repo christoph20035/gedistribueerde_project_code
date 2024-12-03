@@ -11,7 +11,6 @@ import java.rmi.registry.Registry;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 public class Client {
