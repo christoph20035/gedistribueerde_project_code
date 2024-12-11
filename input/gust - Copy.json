@@ -8,7 +8,9 @@
   "iv_writeString": "Arzo1+lOB9KXNazoNhm0Sw==",
   "iv_readString": "LZZnrFXc8jnr+Z4n8TnKkw==",
   "saltString": "b/7gghBCgB4XKBnKbK3RCRH/bX4q23bmnwILzLbyBr4=",
-  "name": "christoph"
+  "name": "christoph",
+  "hashed_state_writeString": "5Orua0bJSFvx2USYrWvPtUofel2peGMP1j6NAUYlIgM=",
+  "hashed_state_readString": "rdBl6sNWagJRXny4eLQfNJA0SZBzz1NG04X9iCAXFuw="
 },
 {
   "symmetricKey_writeString": "mH9Nx2XNONHV9uZobS5TYaj5/0muyDgwQ9vsQUzsKDg=",
@@ -20,5 +22,7 @@
   "iv_writeString": "rc9rs8ag+S+sn+804ra4SA==",
   "iv_readString": "5F/NkkWBGMl9raeOZqnDVw==",
   "saltString": "16CR1cFok8KXMEiGprVF9ASV0ly6jfscr3qP1QaKQtI=",
-  "name": "an"
+  "name": "an",
+  "hashed_state_writeString": "tbReJpHBC65s3YSi1xHz2G7W+hCpkAbUYgSmeRT5iTE=",
+  "hashed_state_readString": "SmzO47N6NDL5BaOLsmgjZvQVyFGL9gLfSNp5qZH9NY4="
 }]

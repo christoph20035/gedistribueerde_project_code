@@ -8,5 +8,7 @@
   "iv_writeString": "LZZnrFXc8jnr+Z4n8TnKkw==",
   "iv_readString": "Arzo1+lOB9KXNazoNhm0Sw==",
   "saltString": "b/7gghBCgB4XKBnKbK3RCRH/bX4q23bmnwILzLbyBr4=",
-  "name": "gust"
+  "name": "gust",
+  "hashed_state_writeString": "rdBl6sNWagJRXny4eLQfNJA0SZBzz1NG04X9iCAXFuw=",
+  "hashed_state_readString": "5Orua0bJSFvx2USYrWvPtUofel2peGMP1j6NAUYlIgM="
 }]

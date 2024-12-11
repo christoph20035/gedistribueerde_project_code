@@ -34,7 +34,13 @@ public class DataFriend {
     String iv_readString;
     @Expose
     @SerializedName("saltString")
-    String saltString; // Keep as String in JSON
+    String saltString;
+    @Expose
+    @SerializedName("hashed_state_writeString")
+    String hashed_state_writeString;
+    @Expose
+    @SerializedName("hashed_state_readString")
+    String hashed_state_readString;// Keep as String in JSON
 
     SecretKey symmetricKey_write;
     SecretKey symmetricKey_read;
@@ -63,6 +69,8 @@ public class DataFriend {
         this.iv_read = Base64.getDecoder().decode(iv_readString);
         this.iv_write = Base64.getDecoder().decode(iv_writeString);
         this.salt = Base64.getDecoder().decode(saltString); // Decode saltString
+        this.hashed_state_write = Base64.getDecoder().decode(hashed_state_writeString);
+        this.hashed_state_read = Base64.getDecoder().decode(hashed_state_readString);
 
         // Create SecretKey objects
         this.symmetricKey_read = new SecretKeySpec(decoded_symmetricKey_read, 0, decoded_symmetricKey_read.length, "AES");

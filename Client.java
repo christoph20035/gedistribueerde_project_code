@@ -192,6 +192,8 @@ public class Client {
             friendJson.addProperty("iv_readString", Base64.getEncoder().encodeToString(df.iv_read));
             friendJson.addProperty("saltString", Base64.getEncoder().encodeToString(df.salt));
             friendJson.addProperty("name", df.name);
+            friendJson.addProperty("hashed_state_writeString", Base64.getEncoder().encodeToString(df.hashed_state_write));
+            friendJson.addProperty("hashed_state_readString", Base64.getEncoder().encodeToString(df.hashed_state_read));
 
             // Add the JSON object to the JsonArray
             jsonArray.add(friendJson);
