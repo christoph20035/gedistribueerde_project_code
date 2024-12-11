@@ -48,6 +48,10 @@ public class DataFriend{
         return messageHys;
     }
 
+    public void clearMessageHys(){
+        messageHys.clear();
+    }
+
     public void induceCorrupted(){
         idx_write++;
         //symmetricKey_read = symmetricKey_write;

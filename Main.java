@@ -8,6 +8,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
     // l -> tag moet groter zijn dan 2^l
@@ -23,11 +25,11 @@ public class Main {
     public static final String SERVER_NAME = "BulletinBoard";
     public static final int PORT_NUMBER = 55000;
 
+    private static final Map<String, Client> clientMap = new HashMap<>();
 
     public static void main (String[] args) throws NoSuchAlgorithmException, IOException, NotBoundException {
 
         // ------------------ START SERVER ------------------
-
         Registry registry = LocateRegistry.createRegistry(PORT_NUMBER);
         // Create an instance of your server implementation
 
@@ -41,26 +43,33 @@ public class Main {
         keyGenAES = KeyGenerator.getInstance("AES");
         keyGenAES.init(256);// 256-bit sleutel
 
-        Client client_christoph = new Client("Christoph", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE*NUMPARTITIONS);
-        Client client_gust = new Client("Gust", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE*NUMPARTITIONS);
-        Client client_an = new Client("An", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE*NUMPARTITIONS);
 
-        makeFriends(client_christoph, client_gust);
-        makeFriends(client_an, client_gust);
+        Client clientChristoph = new Client("Christoph", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE * NUMPARTITIONS);
+        Client clientGust = new Client("Gust", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE * NUMPARTITIONS);
+        Client clientAn = new Client("An", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE * NUMPARTITIONS);
 
-        // Launch the GUI
+        makeFriends(clientChristoph, clientGust);
+        makeFriends(clientAn, clientGust);
+
+        clientMap.put("Christoph", clientChristoph);
+        clientMap.put("Gust", clientGust);
+        clientMap.put("An", clientAn);
+
+        // Launch initial GUIs
+        launchGUI("Christoph");
+        launchGUI("Gust");
+        launchGUI("An");
+    }
+
+    public static void launchGUI(String clientName) {
+        Client client = clientMap.get(clientName);
+        if (client == null) {
+            System.err.println("Client " + clientName + " not found!");
+            return;
+        }
+
         SwingUtilities.invokeLater(() -> {
-            ClientGUI gui = new ClientGUI(client_christoph);
-            gui.setVisible(true);
-        });
-
-        SwingUtilities.invokeLater(() -> {
-            ClientGUI gui = new ClientGUI(client_gust);
-            gui.setVisible(true);
-        });
-
-        SwingUtilities.invokeLater(() -> {
-            ClientGUI gui = new ClientGUI(client_an);
+            ClientGUI gui = new ClientGUI(client);
             gui.setVisible(true);
         });
     }
@@ -96,4 +105,5 @@ public class Main {
         clientAlice.addFriend(df_1);
         clientBob.addFriend(df_2);
     }
+
 }

@@ -15,13 +15,24 @@ public class ClientGUI extends JFrame {
 
     public ClientGUI(Client client) {
         this.client = client;
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // Add a WindowListener to trigger clearHistory() on close
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                clearHistory(); // Call your custom method
+            }
+        });
+
         initializeGUI();
     }
+
 
     private void initializeGUI() {
         setTitle("Client: " + client.getName());
         setSize(600, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         // Top Panel (for the refresh button)
@@ -39,6 +50,14 @@ public class ClientGUI extends JFrame {
         induceCorruptedButton.addActionListener(e -> {
             induceCorrupted();
         });
+
+        JButton relaunchButton = new JButton("Relaunch GUI");
+        relaunchButton.addActionListener(e -> {
+            String clientName = JOptionPane.showInputDialog(this, "Enter client name to relaunch:");
+            Main.launchGUI(clientName);
+        });
+
+        topPanel.add(relaunchButton, BorderLayout.CENTER);
 
         topPanel.add(refreshButton, BorderLayout.EAST); // Place the button on the right
         topPanel.add(induceCorruptedButton, BorderLayout.WEST);
@@ -163,6 +182,15 @@ public class ClientGUI extends JFrame {
         if (selectedFriend == null) return;
         client.induceCorrupted(selectedFriend);
     }
+
+    public void clearHistory() {
+        for(DataFriend friend : client.getFriends()){
+            friend.clearMessageHys();
+        }
+        messageHistory.setText(""); // Clear the GUI message history
+        System.out.println("History cleared for client: " + client.getName());
+    }
+
 
     private void raiseCorruptedError(String error) {
         JOptionPane.showMessageDialog(this,
