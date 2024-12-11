@@ -30,12 +30,18 @@ public class ClientGUI extends JFrame {
         refreshButton.addActionListener(e -> {
             try {
                 refreshUI();
-            } catch (RemoteException | NoSuchAlgorithmException ex) {
+            } catch (NoSuchAlgorithmException | IOException ex) {
                 throw new RuntimeException(ex);
             }
         }); // Define the refresh action
-        topPanel.add(refreshButton, BorderLayout.EAST); // Place the button on the right
 
+        JButton induceCorruptedButton = new JButton("Induce Corrupted Idx/tag");
+        induceCorruptedButton.addActionListener(e -> {
+            induceCorrupted();
+        });
+
+        topPanel.add(refreshButton, BorderLayout.EAST); // Place the button on the right
+        topPanel.add(induceCorruptedButton, BorderLayout.WEST);
         add(topPanel, BorderLayout.NORTH);
 
         // Friend List Panel
@@ -79,16 +85,23 @@ public class ClientGUI extends JFrame {
     }
 
     // Define the refreshUI method to handle the refresh action
-    private void refreshUI() throws RemoteException, NoSuchAlgorithmException {
+    private void refreshUI() throws IOException, NoSuchAlgorithmException {
         // Add logic to refresh the user interface (e.g., reload the friend list, clear message history)
+        System.out.println("REFRESH BUTTON");
         if (selectedFriend == null) return;
         String text = client.receiveMessage(selectedFriend);
-        while(!text.equals("")) {
-            String receivedMessage = selectedFriend.name+": "+text+"\n";
-            messageHistory.append(receivedMessage);
-            selectedFriend.addMessage(receivedMessage);
+        if(text == null){
+            raiseCorruptedError("index, tag or key is corrupted");
+        }
+        else{
+            while(!text.equals("")) {
+                String receivedMessage = selectedFriend.name+": "+text+"\n";
+                messageHistory.append(receivedMessage);
+                selectedFriend.addMessage(receivedMessage);
 
-            text = client.receiveMessage(selectedFriend);
+                text = client.receiveMessage(selectedFriend);
+                System.out.println("Text: " + text);
+            }
         }
     }
 
@@ -117,24 +130,46 @@ public class ClientGUI extends JFrame {
         if (selectedFriend == null || messageInput.getText().isEmpty()) return;
 
         String text = client.receiveMessage(selectedFriend);
-        while(!text.equals("")){
-            String receivedMessage = selectedFriend.name+": "+text+"\n";
-            messageHistory.append(receivedMessage);
-            selectedFriend.addMessage(receivedMessage);
+        if(text == null){
+            raiseCorruptedError("index, tag or key is corrupted");
+        }
+        else{
+            while(!text.equals("")){
+                String receivedMessage = selectedFriend.name+": "+text+"\n";
+                messageHistory.append(receivedMessage);
+                selectedFriend.addMessage(receivedMessage);
 
-            text = client.receiveMessage(selectedFriend);
+                text = client.receiveMessage(selectedFriend);
+            }
         }
 
         String message = messageInput.getText();
         /* // Add to sent messages
         selectedFriend.receiveMessage("Hello"); // Simulate received response*/
-        client.sendMessage(message, selectedFriend);
-        String sendMessage = "ik: "+message + "\n";
-        messageHistory.append(sendMessage);
+        if (!client.sendMessage(message, selectedFriend)) {
+            raiseCorruptedError("index, tag or key is corrupted"); // Show the error popup
+        }
+        else{
+            String sendMessage = "ik: "+message + "\n";
+            messageHistory.append(sendMessage);
 
-        messageInput.setText("");
+            messageInput.setText("");
 
-        selectedFriend.addMessage(sendMessage);
+            selectedFriend.addMessage(sendMessage);
+        }
     }
+
+    private void induceCorrupted(){
+        if (selectedFriend == null) return;
+        client.induceCorrupted(selectedFriend);
+    }
+
+    private void raiseCorruptedError(String error) {
+        JOptionPane.showMessageDialog(this,
+                "Corrupted state detected: " + error,
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
+
 
 }

@@ -1,6 +1,7 @@
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.swing.*;
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -23,7 +24,7 @@ public class Main {
     public static final int PORT_NUMBER = 55000;
 
 
-    public static void main (String[] args) throws NoSuchAlgorithmException, RemoteException, NotBoundException {
+    public static void main (String[] args) throws NoSuchAlgorithmException, IOException, NotBoundException {
 
         // ------------------ START SERVER ------------------
 
@@ -64,7 +65,7 @@ public class Main {
         });
     }
 
-    private static void makeFriends(Client clientAlice, Client clientBob) throws NoSuchAlgorithmException {
+    private static void makeFriends(Client clientAlice, Client clientBob) throws NoSuchAlgorithmException, IOException {
         SecureRandom secureRandom = new SecureRandom();
         KeyGenerator keyGenAES = KeyGenerator.getInstance("AES");
         keyGenAES.init(256); // 256-bit sleutel
@@ -86,13 +87,11 @@ public class Main {
         secureRandom.nextBytes(iv_2);
 
         // Voor de KDF
-        byte[] salt1 = new byte[32];
-        secureRandom.nextBytes(salt1);
-        byte[] salt2 = new byte[32];
-        secureRandom.nextBytes(salt2);
+        byte[] salt = new byte[32];
+        secureRandom.nextBytes(salt);
 
-        DataFriend df_1 = new DataFriend(index_1, index_2, tag_1, tag_2, clientBob.getName(), key_1, key_2, iv_1, iv_2, salt1, salt2);
-        DataFriend df_2 = new DataFriend(index_2, index_1, tag_2, tag_1, clientAlice.getName(), key_2, key_1, iv_2, iv_1, salt2, salt1);
+        DataFriend df_1 = new DataFriend(index_1, index_2, tag_1, tag_2, clientBob.getName(), key_1, key_2, iv_1, iv_2, salt);
+        DataFriend df_2 = new DataFriend(index_2, index_1, tag_2, tag_1, clientAlice.getName(), key_2, key_1, iv_2, iv_1, salt);
 
         clientAlice.addFriend(df_1);
         clientBob.addFriend(df_2);

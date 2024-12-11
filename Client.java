@@ -46,11 +46,13 @@ public class Client {
         friends.add(df2);
     }
 
-    public void sendMessage(String message, DataFriend selectedFriend) throws IOException, NoSuchAlgorithmException {
+    public boolean sendMessage(String message, DataFriend selectedFriend) throws IOException, NoSuchAlgorithmException {
         int index_write = selectedFriend.idx_write;
         byte[] tag_write = selectedFriend.tag_write;
         SecretKey symmetric_key_write = selectedFriend.symmetricKey_write;
-
+        if(!checkCorrupted(index_write, tag_write, symmetric_key_write, selectedFriend, selectedFriend.hashed_state_write)){
+            return false;
+        }
 
         int new_index = secureRandom.nextInt(BULLETIN_BOARD_SIZE);
         byte[] new_tag = new byte[BULLETIN_BOARD_SIZE];
@@ -73,8 +75,21 @@ public class Client {
 
         selectedFriend.idx_write = new_index;
         selectedFriend.tag_write = new_tag;
+        SecretKey newKey = KDF(symmetric_key_write, selectedFriend.salt);
+        selectedFriend.symmetricKey_write = newKey;
+        selectedFriend.hashed_state_write = selectedFriend.setHashedState(new_index, new_tag, newKey);
+        return true;
+    }
 
-        selectedFriend.symmetricKey_write = KDF(symmetric_key_write, selectedFriend.salt_write);
+    private boolean checkCorrupted(int indexWrite, byte[] tagWrite, SecretKey symmetricKeyWrite, DataFriend selectedFriend, byte[] hashed_state) throws IOException {
+        byte[] keyBytes = symmetricKeyWrite.getEncoded();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        outputStream.write(ByteBuffer.allocate(4).putInt(indexWrite).array());
+        outputStream.write(tagWrite);
+        outputStream.write(keyBytes);
+        byte[] state = outputStream.toByteArray();
+        byte[] calculated_hashed_state = digest.digest(state);
+        return Arrays.equals(calculated_hashed_state, hashed_state);
     }
 
     public SecretKey KDF(SecretKey symmetric_key, byte[] salt) throws NoSuchAlgorithmException {
@@ -102,18 +117,21 @@ public class Client {
         }
     }
 
-    public String receiveMessage(DataFriend friend) throws RemoteException, NoSuchAlgorithmException {
+    public String receiveMessage(DataFriend friend) throws IOException, NoSuchAlgorithmException {
         int index = friend.idx_read;
         byte[] tag = friend.tag_read;
         byte[] data =  bulletinBoard.get(index, tag);
+        if(!checkCorrupted(index, tag, friend.symmetricKey_read, friend, friend.hashed_state_read)){
+            return null;
+        }
         if(data == null) {
-            System.out.println("[WARNING] geen data received!");
+            System.out.println("[WARNING] geen data received! " + name);
             return "";
         }
 
         byte[] decryptedDataAES = AES_decrypt(data, friend.symmetricKey_read, friend.iv_read);
         if(decryptedDataAES == null) {
-            System.out.println("[WARNING] Kon data niet deëncrypteren");
+            System.out.println("[WARNING] Kon data niet deëncrypteren " + name);
             return "";
         }
 
@@ -124,10 +142,14 @@ public class Client {
         int new_index = ByteBuffer.wrap(new_indexB).getInt();
         friend.idx_read = new_index;
         friend.tag_read = new_tag;
-
-        friend.symmetricKey_read = KDF(friend.symmetricKey_read, friend.salt_read);
-
+        SecretKey newKey = KDF(friend.symmetricKey_read, friend.salt);
+        friend.symmetricKey_read = newKey;
+        friend.hashed_state_read = friend.setHashedState(new_index, new_tag, newKey);
         return new String(message);
+    }
+
+    public void induceCorrupted(DataFriend friend){
+        friend.induceCorrupted();
     }
 
     public static byte[] AES_decrypt(byte[] encryptedText, SecretKey skey, byte[] iv) {
