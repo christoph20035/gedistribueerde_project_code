@@ -1,0 +1,24 @@
+[{
+  "symmetricKey_writeString": "ca6oFrPUhceSRy06yHBea6vnsvdc/1eyoD23x+JO6Ts=",
+  "symmetricKey_readString": "z6kp5LHxlrEOCZ6Y1w4CxGiev0oDOLHRoe6prwnQmhI=",
+  "idx_write": 128,
+  "idx_read": 32,
+  "tag_writeString": "Uj3NyFJvVF2mkQ/Jzvr3BN6ZjAMplAHXHplXqSdaShp1g6rg+jxvkg==",
+  "tag_readString": "ibqMBlWJ/qwFWyNH5nzTajZfViaXg0i3wXmShmnTx/JI0ZZH/yS+Rg==",
+  "iv_writeString": "Arzo1+lOB9KXNazoNhm0Sw==",
+  "iv_readString": "LZZnrFXc8jnr+Z4n8TnKkw==",
+  "saltString": "b/7gghBCgB4XKBnKbK3RCRH/bX4q23bmnwILzLbyBr4=",
+  "name": "christoph"
+},
+{
+  "symmetricKey_writeString": "mH9Nx2XNONHV9uZobS5TYaj5/0muyDgwQ9vsQUzsKDg=",
+  "symmetricKey_readString": "pmt6SanWpgygcFBPE9Vpp4lqJ/pTRBdRPoR1D4k9IUU=",
+  "idx_write": 33,
+  "idx_read": 99,
+  "tag_writeString": "9Eb2FX4FuFkrVJlxZ2NfTcZLNi6CBe8L76iG8NS9WNsajCSDO40c2Q==",
+  "tag_readString": "8Dl3yO/UTB0FRgxHkao3yOvH9oygWqTjx7GSJ7jwO0jtMrUBz1JLGw==",
+  "iv_writeString": "rc9rs8ag+S+sn+804ra4SA==",
+  "iv_readString": "5F/NkkWBGMl9raeOZqnDVw==",
+  "saltString": "16CR1cFok8KXMEiGprVF9ASV0ly6jfscr3qP1QaKQtI=",
+  "name": "an"
+}]

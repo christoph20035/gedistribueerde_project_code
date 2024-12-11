@@ -25,8 +25,6 @@ public class Main {
     public static final String SERVER_NAME = "BulletinBoard";
     public static final int PORT_NUMBER = 55000;
 
-    private static final Map<String, Client> clientMap = new HashMap<>();
-
     public static void main (String[] args) throws NoSuchAlgorithmException, IOException, NotBoundException {
 
         // ------------------ START SERVER ------------------
@@ -42,68 +40,5 @@ public class Main {
         // -------------- ADD SERVER TO CLIENT --------------
         keyGenAES = KeyGenerator.getInstance("AES");
         keyGenAES.init(256);// 256-bit sleutel
-
-
-        Client clientChristoph = new Client("Christoph", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE * NUMPARTITIONS);
-        Client clientGust = new Client("Gust", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE * NUMPARTITIONS);
-        Client clientAn = new Client("An", SERVER_NAME, PORT_NUMBER, BULLETIN_BOARD_SIZE * NUMPARTITIONS);
-
-        makeFriends(clientChristoph, clientGust);
-        makeFriends(clientAn, clientGust);
-
-        clientMap.put("Christoph", clientChristoph);
-        clientMap.put("Gust", clientGust);
-        clientMap.put("An", clientAn);
-
-        // Launch initial GUIs
-        launchGUI("Christoph");
-        launchGUI("Gust");
-        launchGUI("An");
     }
-
-    public static void launchGUI(String clientName) {
-        Client client = clientMap.get(clientName);
-        if (client == null) {
-            System.err.println("Client " + clientName + " not found!");
-            return;
-        }
-
-        SwingUtilities.invokeLater(() -> {
-            ClientGUI gui = new ClientGUI(client);
-            gui.setVisible(true);
-        });
-    }
-
-    private static void makeFriends(Client clientAlice, Client clientBob) throws NoSuchAlgorithmException, IOException {
-        SecureRandom secureRandom = new SecureRandom();
-        KeyGenerator keyGenAES = KeyGenerator.getInstance("AES");
-        keyGenAES.init(256); // 256-bit sleutel
-
-        int index_1 = secureRandom.nextInt(BULLETIN_BOARD_SIZE); // Generate een nummer tussen 0 <= x < BULLETIN_BOARD_SIZE
-        int index_2 = secureRandom.nextInt(BULLETIN_BOARD_SIZE);
-
-        SecretKey key_1 = keyGenAES.generateKey();
-        SecretKey key_2 = keyGenAES.generateKey();
-
-        byte[] tag_1 = new byte[TAG_BITS];
-        secureRandom.nextBytes(tag_1);
-        byte[] tag_2 = new byte[TAG_BITS];
-        secureRandom.nextBytes(tag_2);
-
-        byte[] iv_1 = new byte[16];
-        secureRandom.nextBytes(iv_1);
-        byte[] iv_2 = new byte[16];
-        secureRandom.nextBytes(iv_2);
-
-        // Voor de KDF
-        byte[] salt = new byte[32];
-        secureRandom.nextBytes(salt);
-
-        DataFriend df_1 = new DataFriend(index_1, index_2, tag_1, tag_2, clientBob.getName(), key_1, key_2, iv_1, iv_2, salt);
-        DataFriend df_2 = new DataFriend(index_2, index_1, tag_2, tag_1, clientAlice.getName(), key_2, key_1, iv_2, iv_1, salt);
-
-        clientAlice.addFriend(df_1);
-        clientBob.addFriend(df_2);
-    }
-
 }

@@ -12,6 +12,11 @@ import java.security.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import com.google.gson.Gson;
+import java.io.FileWriter;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.util.Base64;
 
 public class Client {
     private List<DataFriend> friends = new ArrayList<> ();
@@ -19,11 +24,13 @@ public class Client {
     private PartitionManager bulletinBoard;
     private SecureRandom secureRandom = new SecureRandom();
     private int BULLETIN_BOARD_SIZE;
+    private String export_path;
 
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-    public Client(String name, String SERVER_NAME, int PORT_NUMBER, int BULLETIN_BOARD_SIZE) throws RemoteException, NotBoundException, NoSuchAlgorithmException {
+    public Client(String name, String SERVER_NAME, int PORT_NUMBER, int BULLETIN_BOARD_SIZE, String export_path) throws RemoteException, NotBoundException, NoSuchAlgorithmException {
         this.name = name;
+        this.export_path = export_path;
         Registry myRegistry = LocateRegistry.getRegistry("localhost", PORT_NUMBER);
         bulletinBoard = (PartitionManager) myRegistry.lookup(SERVER_NAME);
         if(bulletinBoard == null) {
@@ -162,6 +169,40 @@ public class Client {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public void exportDataFriend() {
+        Gson gson = new Gson();
+
+        // Create a JsonArray to store the serialized DataFriend objects
+        JsonArray jsonArray = new JsonArray();
+
+        for (DataFriend df : friends) {
+            JsonObject friendJson = new JsonObject();
+
+            // Convert the required fields to Base64 strings and add to the JSON object
+            friendJson.addProperty("symmetricKey_writeString", Base64.getEncoder().encodeToString(df.symmetricKey_write.getEncoded()));
+            friendJson.addProperty("symmetricKey_readString", Base64.getEncoder().encodeToString(df.symmetricKey_read.getEncoded()));
+            friendJson.addProperty("idx_write", df.idx_write);
+            friendJson.addProperty("idx_read", df.idx_read);
+            friendJson.addProperty("tag_writeString", Base64.getEncoder().encodeToString(df.tag_write));
+            friendJson.addProperty("tag_readString", Base64.getEncoder().encodeToString(df.tag_read));
+            friendJson.addProperty("iv_writeString", Base64.getEncoder().encodeToString(df.iv_write));
+            friendJson.addProperty("iv_readString", Base64.getEncoder().encodeToString(df.iv_read));
+            friendJson.addProperty("saltString", Base64.getEncoder().encodeToString(df.salt));
+            friendJson.addProperty("name", df.name);
+
+            // Add the JSON object to the JsonArray
+            jsonArray.add(friendJson);
+        }
+
+        // Write the JSON array to a file
+        try (FileWriter writer = new FileWriter(export_path)) {
+            gson.toJson(jsonArray, writer);  // Use Gson to serialize and write to file
+            System.out.println("DataFriends exported successfully to: " + export_path);
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
         }
     }
 

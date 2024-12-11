@@ -1,4 +1,5 @@
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -6,39 +7,74 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
-public class DataFriend{
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class DataFriend {
+    @Expose
+    @SerializedName("symmetricKey_writeString")
+    String symmetricKey_writeString;
+    @Expose
+    @SerializedName("symmetricKey_readString")
+    String symmetricKey_readString;
+    @Expose
+    @SerializedName("tag_writeString")
+    String tag_writeString;
+    @Expose
+    @SerializedName("tag_readString")
+    String tag_readString;
+    @Expose
+    @SerializedName("iv_writeString")
+    String iv_writeString;
+    @Expose
+    @SerializedName("iv_readString")
+    String iv_readString;
+    @Expose
+    @SerializedName("saltString")
+    String saltString; // Keep as String in JSON
+
     SecretKey symmetricKey_write;
     SecretKey symmetricKey_read;
+    @Expose
     int idx_write;
+    @Expose
     int idx_read;
     byte[] tag_write;
     byte[] tag_read;
     byte[] iv_write;
     byte[] iv_read;
-    byte[] salt;
+    byte[] salt; // Exclude from direct Gson deserialization
+    @Expose
     String name;
     byte[] hashed_state_write;
     byte[] hashed_state_read;
     List<String> messageHys = new ArrayList<>();
+    transient MessageDigest digest; // Exclude from serialization
 
-    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    public void initialize() throws NoSuchAlgorithmException, IOException {
+        // Decode Base64 fields
+        byte[] decoded_symmetricKey_read = Base64.getDecoder().decode(symmetricKey_readString);
+        byte[] decoded_symmetricKey_write = Base64.getDecoder().decode(symmetricKey_writeString);
+        this.tag_read = Base64.getDecoder().decode(tag_readString);
+        this.tag_write = Base64.getDecoder().decode(tag_writeString);
+        this.iv_read = Base64.getDecoder().decode(iv_readString);
+        this.iv_write = Base64.getDecoder().decode(iv_writeString);
+        this.salt = Base64.getDecoder().decode(saltString); // Decode saltString
 
-    public DataFriend(int idx_read, int idx_write, byte[] tag_read, byte[] tag_write, String name, SecretKey symmetricKey_read,
-                      SecretKey symmetricKey_write, byte[] iv_read, byte[] iv_write, byte[] salt) throws NoSuchAlgorithmException, IOException {
-        this.idx_read = idx_read;
-        this.idx_write = idx_write;
-        this.tag_read = tag_read;
-        this.tag_write = tag_write;
-        this.name = name;
-        this.symmetricKey_read = symmetricKey_read;
-        this.symmetricKey_write = symmetricKey_write;
-        this.iv_read = iv_read;
-        this.iv_write = iv_write;
-        this.salt = salt;
-        this.hashed_state_write = setHashedState(idx_write, tag_write, symmetricKey_write);
-        this.hashed_state_read = setHashedState(idx_read, tag_read, symmetricKey_read);
+        // Create SecretKey objects
+        this.symmetricKey_read = new SecretKeySpec(decoded_symmetricKey_read, 0, decoded_symmetricKey_read.length, "AES");
+        this.symmetricKey_write = new SecretKeySpec(decoded_symmetricKey_write, 0, decoded_symmetricKey_write.length, "AES");
+
+        // Initialize MessageDigest
+        this.digest = MessageDigest.getInstance("SHA-256");
+
+        // Compute hashed states
+        this.hashed_state_write = setHashedState(this.idx_write, this.tag_write, this.symmetricKey_write);
+        this.hashed_state_read = setHashedState(this.idx_read, this.tag_read, this.symmetricKey_read);
+        messageHys = new ArrayList<>();
     }
 
     public void addMessage(String message) {

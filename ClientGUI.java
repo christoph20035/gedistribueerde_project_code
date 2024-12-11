@@ -51,14 +51,6 @@ public class ClientGUI extends JFrame {
             induceCorrupted();
         });
 
-        JButton relaunchButton = new JButton("Relaunch GUI");
-        relaunchButton.addActionListener(e -> {
-            String clientName = JOptionPane.showInputDialog(this, "Enter client name to relaunch:");
-            Main.launchGUI(clientName);
-        });
-
-        topPanel.add(relaunchButton, BorderLayout.CENTER);
-
         topPanel.add(refreshButton, BorderLayout.EAST); // Place the button on the right
         topPanel.add(induceCorruptedButton, BorderLayout.WEST);
         add(topPanel, BorderLayout.NORTH);
@@ -184,9 +176,11 @@ public class ClientGUI extends JFrame {
     }
 
     public void clearHistory() {
+        System.out.println("Gesloten gedrukt");
         for(DataFriend friend : client.getFriends()){
             friend.clearMessageHys();
         }
+        client.exportDataFriend();
         messageHistory.setText(""); // Clear the GUI message history
         System.out.println("History cleared for client: " + client.getName());
     }
