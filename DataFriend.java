@@ -80,8 +80,8 @@ public class DataFriend {
         this.digest = MessageDigest.getInstance("SHA-256");
 
         // Compute hashed states
-        this.hashed_state_write = setHashedState(this.idx_write, this.tag_write, this.symmetricKey_write);
-        this.hashed_state_read = setHashedState(this.idx_read, this.tag_read, this.symmetricKey_read);
+        this.hashed_state_write = Base64.getDecoder().decode(hashed_state_writeString);
+        this.hashed_state_read = Base64.getDecoder().decode(hashed_state_readString);
         messageHys = new ArrayList<>();
     }
 
