@@ -76,8 +76,6 @@ public class Client {
 
         byte[] hashed_tag = digest.digest(tag_write);
 
-        System.out.println(new_index);
-
         bulletinBoard.add(index_write, encryptedTextAES, hashed_tag);
 
         selectedFriend.idx_write = new_index;
@@ -132,7 +130,7 @@ public class Client {
             return null;
         }
         if(data == null) {
-            System.out.println("[WARNING] geen data received! " + name);
+            // System.out.println("[WARNING] geen data received! " + name);
             return "";
         }
 

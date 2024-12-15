@@ -23,7 +23,7 @@ public class Main {
     public static KeyGenerator keyGenAES;
 
     public static final String SERVER_NAME = "BulletinBoard";
-    public static final int PORT_NUMBER = 55000;
+    public static final int PORT_NUMBER = 60000;
 
     public static void main (String[] args) throws NoSuchAlgorithmException, IOException, NotBoundException {
 

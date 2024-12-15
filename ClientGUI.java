@@ -98,7 +98,6 @@ public class ClientGUI extends JFrame {
     // Define the refreshUI method to handle the refresh action
     private void refreshUI() throws IOException, NoSuchAlgorithmException {
         // Add logic to refresh the user interface (e.g., reload the friend list, clear message history)
-        System.out.println("REFRESH BUTTON");
         if (selectedFriend == null) return;
         String text = client.receiveMessage(selectedFriend);
         if(text == null){
@@ -111,7 +110,6 @@ public class ClientGUI extends JFrame {
                 selectedFriend.addMessage(receivedMessage);
 
                 text = client.receiveMessage(selectedFriend);
-                System.out.println("Text: " + text);
             }
         }
     }
