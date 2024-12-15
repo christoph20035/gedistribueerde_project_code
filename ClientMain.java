@@ -23,7 +23,7 @@ public class ClientMain {
         String name = args[0];
         String input_path = args[1];
 
-        Client client = new Client(name, Main.SERVER_NAME, Main.PORT_NUMBER, Main.BULLETIN_BOARD_SIZE * Main.NUMPARTITIONS, input_path);
+        Client client = new Client(name, Main.SERVER_NAME, Main.PORT_NUMBER, Main.BULLETIN_BOARD_SIZE * Main.NUMPARTITIONS, input_path, Main.TAG_BITS);
         if (client == null) {
             System.out.println("Client " + name + " not found.");
         }

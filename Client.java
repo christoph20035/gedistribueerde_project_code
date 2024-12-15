@@ -24,11 +24,12 @@ public class Client {
     private PartitionManager bulletinBoard;
     private SecureRandom secureRandom = new SecureRandom();
     private int BULLETIN_BOARD_SIZE;
+    private int TAG_BITS;
     private String export_path;
 
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-    public Client(String name, String SERVER_NAME, int PORT_NUMBER, int BULLETIN_BOARD_SIZE, String export_path) throws RemoteException, NotBoundException, NoSuchAlgorithmException {
+    public Client(String name, String SERVER_NAME, int PORT_NUMBER, int BULLETIN_BOARD_SIZE, String export_path, int tagBits) throws RemoteException, NotBoundException, NoSuchAlgorithmException {
         this.name = name;
         this.export_path = export_path;
         Registry myRegistry = LocateRegistry.getRegistry("localhost", PORT_NUMBER);
@@ -36,14 +37,13 @@ public class Client {
         if(bulletinBoard == null) {
             System.out.println("BulletinBoard not found");
         }
-
+        this.TAG_BITS = tagBits;
         this.BULLETIN_BOARD_SIZE = BULLETIN_BOARD_SIZE;
     }
 
     public List<DataFriend> getFriends() {
         return friends;
     }
-
 
     public String getName(){
         return name;
@@ -62,7 +62,7 @@ public class Client {
         }
 
         int new_index = secureRandom.nextInt(BULLETIN_BOARD_SIZE);
-        byte[] new_tag = new byte[BULLETIN_BOARD_SIZE];
+        byte[] new_tag = new byte[TAG_BITS];
         secureRandom.nextBytes(new_tag);
 
         // Voeg bytes achter elkaar toe om message te vormen
@@ -143,9 +143,9 @@ public class Client {
         }
 
         //the last
-        byte[] new_tag = Arrays.copyOfRange(decryptedDataAES, decryptedDataAES.length - BULLETIN_BOARD_SIZE, decryptedDataAES.length);
-        byte[] new_indexB = Arrays.copyOfRange(decryptedDataAES, decryptedDataAES.length - BULLETIN_BOARD_SIZE-4, decryptedDataAES.length- BULLETIN_BOARD_SIZE);
-        byte[] message = Arrays.copyOfRange(decryptedDataAES, 0, decryptedDataAES.length - BULLETIN_BOARD_SIZE-4);
+        byte[] new_tag = Arrays.copyOfRange(decryptedDataAES, decryptedDataAES.length - TAG_BITS, decryptedDataAES.length);
+        byte[] new_indexB = Arrays.copyOfRange(decryptedDataAES, decryptedDataAES.length - TAG_BITS-4, decryptedDataAES.length- TAG_BITS);
+        byte[] message = Arrays.copyOfRange(decryptedDataAES, 0, decryptedDataAES.length - TAG_BITS-4);
         int new_index = ByteBuffer.wrap(new_indexB).getInt();
         friend.idx_read = new_index;
         friend.tag_read = new_tag;
